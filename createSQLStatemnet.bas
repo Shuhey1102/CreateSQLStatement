@@ -1,5 +1,5 @@
 Attribute VB_Name = "Module1"
-Const StartIndex As Integer = 10 '1レコード目
+Const StartIndex As Integer = 10 'Start Index
 
 Sub ExecuteProcess()
 
