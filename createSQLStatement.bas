@@ -7,7 +7,7 @@ Attribute VB_Name = "Module1"
 '-----------------------------------------------------------------------------------
 ' v1.0 22022/04/11 梶原    新規作成
 '************************************************************************************
-Const StartIndex As Integer = 10 'Start Index
+Const StartIndex As Integer = 10 'StartIndex
 
 Sub ExecuteProcess()
 
@@ -165,7 +165,7 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
         Dim Record As String
         Record = "("
 
-        For j = 0 To Columnlength
+        For j = 0 To Columnlength - 1
             Dim columnType As String
             columnType = Sheets("Sheet1").Cells(7, j + 3).Value
             'case : VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
@@ -202,7 +202,7 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                     Record = Record & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value
                 End If
             End If
-            If (j = Columnlength) Then
+            If (j = Columnlength - 1) Then
                 Record = Record & ")"
             Else
                 Record = Record & ","
@@ -235,7 +235,7 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
         OutPutCol = OutPutCol + 1
     
         Record = ""
-        For j = 1 To Columnlength
+        For j = 1 To Columnlength - 1
             Dim columnType As String
             columnType = Sheets("Sheet1").Cells(7, j + 3).Value
             'case : VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
@@ -272,7 +272,7 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
                     Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value
                 End If
             End If
-            If (j = Columnlength) Then
+            If (j = Columnlength - 1) Then
                 Record = Record & " WHERE ID = " & Sheets("Sheet1").Cells(UPDNo(i), 3).Value
             Else
                 Record = Record & ","
@@ -320,3 +320,4 @@ Function GetColumnNumber()
     
     GetColumnNumber = j - 3
 End Function
+
