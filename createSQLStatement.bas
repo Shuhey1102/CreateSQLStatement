@@ -6,6 +6,7 @@ Attribute VB_Name = "Module1"
 ' №   日付       変更者　変更内容
 '-----------------------------------------------------------------------------------
 ' v1.0 22022/04/11 梶原    新規作成
+' v1.1 22022/04/14 梶原    更新(NULL扱い)
 '************************************************************************************
 Const StartIndex As Integer = 10 'StartIndex
 
@@ -168,8 +169,8 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
         For j = 0 To Columnlength - 1
             Dim columnType As String
             columnType = Sheets("Sheet1").Cells(7, j + 3).Value
-            'case : VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
-            If columnType = "VARCHAR" Or columnType = "NVARCHAR" Or columnType = "CHAR" Or columnType = "DATETIME" Or columnType = "DATE" Or columnType = "TIME" Then
+            'case : Except for INT,BIT,BIGINT
+            If UCase(columnType) <> "INT" And UCase(columnType) <> "BIGINT" And UCase(columnType) <> "BIT" Then
                 If Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
                          If MandatoryCheckExeFLG Then
@@ -182,9 +183,20 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                         Record = Record & "NULL"
                     End If
                 Else
-                   Record = Record & "'" & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value & "'"
+                    If UCase(Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value) = "NULL" Then                                                       'v1.1
+                        If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
+                            MsgBox (Sheets("Sheet1").Cells(6, j + 3).Value & " must not be null. (col : " & ADDNo(i) & ")")             'v1.1
+                            CreateInsert = -1                                                                                                                                'v1.1
+                            Exit Function                                                                                                                                       'v1.1
+                        Else                                                                                                                                                        'v1.1
+                            Record = Record & "NULL"                                                                                                                  'v1.1
+                        End If                                                                                                                                                     'v1.1
+                   Else                                                                                                                                                             'v1.1
+                        Record = Record & "'" & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value & "'"                                            'v1.1
+                   End If                                                                                                                                                          'v1.1
+                   
                 End If
-            'case : Except for VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
+            'case : INT,BIT,BIGINT
             Else
                 If Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
@@ -199,7 +211,17 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                         Record = Record & 0
                     End If
                 Else
-                    Record = Record & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value
+                    If UCase(Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value) = "NULL" Then                                                       'v1.1
+                        If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
+                            MsgBox (Sheets("Sheet1").Cells(6, j + 3).Value & " must not be null. (col : " & ADDNo(i) & ")")             'v1.1
+                            CreateInsert = -1                                                                                                                                'v1.1
+                            Exit Function                                                                                                                                       'v1.1
+                        Else                                                                                                                                                        'v1.1
+                            Record = Record & "NULL"                                                                                                                  'v1.1
+                        End If                                                                                                                                                     'v1.1
+                   Else                                                                                                                                                             'v1.1
+                        Record = Record & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value                                                            'v1.1
+                   End If                                                                                                                                                          'v1.1
                 End If
             End If
             If (j = Columnlength - 1) Then
@@ -238,8 +260,8 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
         For j = 1 To Columnlength - 1
             Dim columnType As String
             columnType = Sheets("Sheet1").Cells(7, j + 3).Value
-            'case : VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
-            If columnType = "VARCHAR" Or columnType = "NVARCHAR" Or columnType = "CHAR" Or columnType = "DATETIME" Or columnType = "DATE" Or columnType = "TIME" Then
+            'case : Except for INT,BIT,BIGINT
+            If UCase(columnType) <> "INT" And UCase(columnType) <> "BIGINT" And UCase(columnType) <> "BIT" Then
                 If Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
                          If MandatoryCheckExeFLG Then
@@ -252,9 +274,19 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
                         Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = NULL"
                     End If
                 Else
-                   Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "'" & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value & "'"
+                   If UCase(Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value) = "NULL" Then                                                       'v1.1
+                        If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
+                            MsgBox (Sheets("Sheet1").Cells(6, j + 3).Value & " must not be null. (col : " & UPDNo(i) & ")")             'v1.1
+                            CreateUpdate = -1                                                                                                                              'v1.1
+                            Exit Function                                                                                                                                       'v1.1
+                        Else                                                                                                                                                        'v1.1
+                            Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "NULL"                                          'v1.1
+                        End If                                                                                                                                                     'v1.1
+                   Else                                                                                                                                                             'v1.1
+                        Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "'" & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value & "'"  'v1.1
+                   End If                                                                                                                                                          'v1.1
                 End If
-            'case : Except for VARCHAR,NVARCHAR,CHAR,DATETIME,DATE,TIME
+            'case : INT,BIT,BIGINT
             Else
                 If Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
@@ -269,7 +301,17 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
                         Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & 0
                     End If
                 Else
-                    Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value
+                    If UCase(Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value) = "NULL" Then                                                      'v1.1
+                        If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
+                            MsgBox (Sheets("Sheet1").Cells(6, j + 3).Value & " must not be NULL. (col : " & UPDNo(i) & ")")           'v1.1
+                            CreateUpdate = -1                                                                                                                              'v1.1
+                            Exit Function                                                                                                                                       'v1.1
+                        Else                                                                                                                                                        'v1.1
+                            Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "NULL"                                          'v1.1
+                        End If                                                                                                                                                     'v1.1
+                   Else                                                                                                                                                             'v1.1
+                        Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value 'v1.1
+                   End If                                                                                                                                                          'v1.1
                 End If
             End If
             If (j = Columnlength - 1) Then
