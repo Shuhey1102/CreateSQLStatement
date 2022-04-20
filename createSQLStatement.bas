@@ -1,5 +1,4 @@
-Attribute VB_Name = "Module1"
-'************************************************************************************
+Attribute VB_Name = "Module1"'************************************************************************************
 ' ＜サンプルデータ作成のSQL文自動生成＞
 '
 ' 変更履歴
@@ -7,6 +6,7 @@ Attribute VB_Name = "Module1"
 '-----------------------------------------------------------------------------------
 ' v1.0 22022/04/11 梶原    新規作成
 ' v1.1 22022/04/14 梶原    更新(NULL扱い)
+' v1.2 22022/04/15 梶原    更新(N Prefix)
 '************************************************************************************
 Const StartIndex As Integer = 10 'StartIndex
 
@@ -171,6 +171,7 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
             columnType = Sheets("Sheet1").Cells(7, j + 3).Value
             'case : Except for INT,BIT,BIGINT
             If UCase(columnType) <> "INT" And UCase(columnType) <> "BIGINT" And UCase(columnType) <> "BIT" Then
+                'Record is Blank
                 If Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
                          If MandatoryCheckExeFLG Then
@@ -182,6 +183,7 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                     Else
                         Record = Record & "NULL"
                     End If
+                'Record is not Blank
                 Else
                     If UCase(Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value) = "NULL" Then                                                       'v1.1
                         If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
@@ -191,13 +193,17 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                         Else                                                                                                                                                        'v1.1
                             Record = Record & "NULL"                                                                                                                  'v1.1
                         End If                                                                                                                                                     'v1.1
-                   Else                                                                                                                                                             'v1.1
+                   Else                                                                                                                                                             'v1.2
+                        If UCase(columnType) = "NVARCHAR" Then                                                                                             'v1.2
+                            Record = Record & "N"                                                                                                                        'v1.2
+                        End If                                                                                                                                                     'v1.1
                         Record = Record & "'" & Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value & "'"                                            'v1.1
                    End If                                                                                                                                                          'v1.1
                    
                 End If
             'case : INT,BIT,BIGINT
             Else
+                'Record is Blank
                 If Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value = "" Then
                     If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then
                         If MandatoryCheckExeFLG Then
@@ -210,6 +216,7 @@ Function CreateInsert(ADDNo As Variant, Columnlength As Integer, OutPutCol As In
                     Else
                         Record = Record & 0
                     End If
+                'Record is not Blank
                 Else
                     If UCase(Sheets("Sheet1").Cells(ADDNo(i), j + 3).Value) = "NULL" Then                                                       'v1.1
                         If Sheets("Sheet1").Cells(9, j + 3).Value = "NOT NULL" Then                                                                   'v1.1
@@ -283,7 +290,11 @@ Function CreateUpdate(UPDNo As Variant, Columnlength As Integer, OutPutCol As In
                             Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "NULL"                                          'v1.1
                         End If                                                                                                                                                     'v1.1
                    Else                                                                                                                                                             'v1.1
-                        Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "'" & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value & "'"  'v1.1
+                        If UCase(columnType) = "NVARCHAR" Then                                                                                           'v1.2
+                            Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "N'" & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value & "'"  'v1.2
+                        Else                                                                                                                                                         '1.2
+                            Record = Record & Sheets("Sheet1").Cells(6, j + 3).Value & " = " & "'" & Sheets("Sheet1").Cells(UPDNo(i), j + 3).Value & "'"  'v1.1
+                        End If                                                                                                                                                     'v1.2
                    End If                                                                                                                                                          'v1.1
                 End If
             'case : INT,BIT,BIGINT
@@ -362,4 +373,3 @@ Function GetColumnNumber()
     
     GetColumnNumber = j - 3
 End Function
-
